@@ -10,7 +10,7 @@ def build_deck():
     #example card: Red 7, Green 8, Blue Skip
     colours = ["Red", "Green", "Yellow","Blue"]
     values = [0,1,2,3,4,5,6,7,8,9, "Draw Two", "Skip", "Reverse"]
-    wilds = ["wild", "Wild Draw Four"]
+    wilds = ["Wild", "Wild Draw Four"]
     for colour in colours:
         for value in values:
             card_val = f"{colour}, {value}"
@@ -30,7 +30,7 @@ Return values deck -> list
 """
 def shuffle_deck(deck):
     for card_pos in range(len(deck)):
-        rand_pos = random.randint(0, 107)
+        rand_pos = random.randint(0, len(deck)-1)
         deck[card_pos], deck[rand_pos] = deck[rand_pos], deck[card_pos]
     return deck
 
@@ -50,19 +50,30 @@ parameters: player -> integer, playerHand -> list
 return: none
 """
 def show_hand(player, player_hand):
-    print(f"Player {player + 1}")
+    print(f"Player's {player + 1}")
     print("Your Hand")
     print("--------------")
+    y = 1
     for card in player_hand:
-        print(card)
+        print(f"{y}) {card}")
+        y += 1
     print("")    
 
 """
 Check whether a player is able to play a card, or not
-parameters: discardCard->string, playerHand->list
+parameters: colour->string,value -> string,  playerHand->list
 return: Boolean
 """
-def can_play(discard_card, player_hand):
+def can_play(colour, value, player_hand):
+    for card in player_hand:
+        if "Wild" in card:
+            return True
+        elif colour in card or value in card:
+            return True
+    return False   
+    
+
+    
     
 
 
@@ -85,10 +96,30 @@ player_turn = 0
 player_direction = 1
 playing = True
 discards.append(uno_deck.pop(0))
+split_card = discards[0].split(" ", 1)
+current_colour = split_card[0]
+if current_colour != "Wild":
+    card_value = split_card[1]
+
+else:
+     card_value = "Any"    
+
 
 while playing:
     show_hand(player_turn, players[player_turn])
     print(f"Card on top of discard pile: {discards[-1]}")
+    if can_play(current_colour, card_value,players[player_turn]):
+        card_chosen = int(input("Which card do you want to player."))
+        while not can_play(current_colour, card_value, [players[player_turn][card_chosen -1]]):
+            card_chosen = int(input("Not a valid card. Which card do you want to player."))
+        print(f"You played {players[player_turn][card_chosen-1]}")
+        discards.append(players[player_turn].pop(card_chosen-1))
+    else:
+        print("You can't play. You have to draw a card")
+        players[player_turn].extend(draw_cards(1))
+    print("")    
+
+    player_turn += player_direction    
 
      
 
